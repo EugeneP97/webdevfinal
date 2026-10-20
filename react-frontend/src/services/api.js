@@ -1,14 +1,34 @@
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+const TOKEN_KEY = "token";
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+function setToken(token) {
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token);
+  } else {
+    localStorage.removeItem(TOKEN_KEY);
+  }
+}
 
 async function request(path, options = {}) {
   const url = `${API_URL}${path}`;
+  const token = getToken();
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...options.headers,
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const response = await fetch(url, {
     ...options,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
+    headers,
   });
 
   const data = await response.json().catch(() => ({}));
@@ -18,16 +38,19 @@ async function request(path, options = {}) {
   return data;
 }
 
-export const login = (email, password) =>
-  request("/auth/login", {
+export const login = async (email, password) => {
+  const data = await request("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
+  setToken(data.token);
+  return data;
+};
 
-export const logout = () =>
-  request("/auth/logout", {
-    method: "POST",
-  });
+export const logout = () => {
+  setToken(null);
+  return Promise.resolve({ message: "Logged out" });
+};
 
 export const getMe = () => request("/auth/me");
 

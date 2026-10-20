@@ -1,9 +1,14 @@
+import { config } from "dotenv";
 import { MongoClient } from "mongodb";
 import bcrypt from "bcrypt";
 
+config({ path: ".env.local" });
+
 const uri = process.env.MONGODB_URI;
 if (!uri) {
-  console.error("Please set MONGODB_URI environment variable");
+  console.error(
+    "Please set MONGODB_URI in next-backend/.env.local or as an environment variable",
+  );
   process.exit(1);
 }
 
