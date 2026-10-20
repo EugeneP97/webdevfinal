@@ -26,3 +26,10 @@ export function successResponse(jsonData, status) {
     headers: corsHeaders,
   });
 }
+
+export function optionsResponse() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: corsHeaders,
+  });
+}
